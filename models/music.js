@@ -13,7 +13,7 @@ const MusicSchema = new mongoose.Schema(
       required: [true, "please provide a song name"],
       maxLength: 100,
     },
-    Genre: {
+    genre: {
       type: String,
       enum: [
         "pop",

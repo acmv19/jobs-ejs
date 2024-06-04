@@ -2,8 +2,15 @@ const express = require("express");
 require("express-async-errors");
 require("dotenv").config(); // to load the .env file into the process.env object
 const secretWordRouter = require("./routes/secretWord");
+const musicRouter = require("./routes/music");
 const auth = require("./middleware/auth");
 const app = express();
+//security packages:
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const rateLimiter = require("express-rate-limit");
+const cookieParse = require("cookie-parser");
+const csrf = require("host-csrf");
 
 const session = require("express-session");
 /*app.use(
@@ -13,6 +20,9 @@ const session = require("express-session");
     saveUninitialized: true,
   })
 );*/
+const passport = require("passport");
+const passportInit = require("./passport/passportInit");
+
 const MongoDBStore = require("connect-mongodb-session")(session);
 const url = process.env.MONGO_URI;
 
@@ -39,12 +49,52 @@ if (app.get("env") === "production") {
 }
 
 app.use(session(sessionParms));
+
+passportInit();
+app.use(passport.initialize());
+app.use(passport.session());
+
 app.use(require("connect-flash")()); //
 
 app.use(require("./middleware/storeLocals"));
+
+// Security middleware
+app.set("trust proxy", 1);
+app.use(
+  rateLimiter({
+    windowMs: 15 * 60 * 1000, //15 min
+    max: 100, // limit each IP to 100 request per window
+  })
+);
+//extra security package
+app.use(helmet());
+app.use(xss());
+
+// CSRF Protection Middleware
+app.use(cookieParse(process.env.SESSION_SECRET));
+app.use(express.urlencoded({ extended: false }));
+
+let csrf_development_mode = true;
+
+if (app.get("env") === "production") {
+  csrf_development_mode = false;
+  app.set("trust proxy", 1);
+}
+const csrf_options = {
+  protected_operations: ["PATCH"],
+  protected_content_types: ["application/json"],
+  development_mode: csrf_development_mode,
+};
+const csrf_middleware = csrf(csrf_options); // <-- Inicializar middleware CSRF
+
+app.use(csrf_middleware); // Must come after cookie-parser and body-parser, but before routes
+
+//routes
+
 app.get("/", (req, res) => {
   res.render("index");
 });
+
 app.use("/sessions", require("./routes/sessionRoutes"));
 
 app.set("view engine", "ejs");
@@ -74,22 +124,20 @@ app.post("/secretWord", (req, res) => {
 
 app.use("/secretWord", secretWordRouter);
 app.use("/secretWord", auth, secretWordRouter);
+app.use("/musics", auth, musicRouter); //<-----aqui----->
 
 app.use((req, res) => {
   res.status(404).send(`That page (${req.url}) was not found.`);
 });
 
 app.use((err, req, res, next) => {
-  res.status(500).send(err.message);
-  console.log(err);
+  if (err.code === "EBADCSRFTOKEN") {
+    res.status(403).send("CSRF token validation failed");
+  } else {
+    res.status(500).send(err.message);
+    console.log(err);
+  }
 });
-
-const passport = require("passport");
-const passportInit = require("./passport/passportInit");
-
-passportInit();
-app.use(passport.initialize());
-app.use(passport.session());
 
 const port = process.env.PORT || 3000;
 
