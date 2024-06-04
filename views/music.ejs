@@ -1,0 +1,56 @@
+<%- include("partials/head.ejs") %> <%- include("partials/header.ejs") %>
+
+<h2><%= music ? 'Edit Music' : 'Add New Music' %></h2>
+
+<form
+  action="<%= music ? '/musics/update/' + music._id : '/musics' %>"
+  method="POST"
+  class="music-form"
+>
+  <div>
+    <label for="singer">Singer:</label>
+    <input
+      type="text"
+      id="singer"
+      name="singer"
+      value="<%= music ? music.singer : '' %>"
+      required
+    />
+  </div>
+  <div>
+    <label for="song">Song:</label>
+    <input
+      type="text"
+      id="song"
+      name="song"
+      value="<%= music ? music.song : '' %>"
+      required
+    />
+  </div>
+  <div>
+    <label for="genre">Genre:</label>
+    <select id="genre" name="genre">
+      <option value="pop" <%= music && music.genre === 'pop' ? 'selected' : '' %>>pop</option>
+      <option value="country" <%= music && music.genre === 'country' ? 'selected' : '' %>>country</option>
+      <option value="rock" <%= music && music.genre === 'rock' ? 'selected' : '' %>>rock</option>
+      <option value="clasic" <%= music && music.genre === 'clasic' ? 'selected' : '' %>>clasic</option>
+      <option value="electronic" <%= music && music.genre === 'electronic' ? 'selected' : '' %>>electronic</option>
+      <option value="latina" <%= music && music.genre === 'latina' ? 'selected' : '' %>>latina</option>
+      <option value="salsa" <%= music && music.genre === 'salsa' ? 'selected' : '' %>>salsa</option>
+      <option value="merengue" <%= music && music.genre === 'merengue' ? 'selected' : '' %>>merengue</option>
+      <option value="pasodoble" <%= music && music.genre === 'pasodoble' ? 'selected' : '' %>>pasodoble</option>
+      <option value="blues" <%= music && music.genre === 'blues' ? 'selected' : '' %>>blues</option>
+      <option value="jazz" <%= music && music.genre === 'jazz' ? 'selected' : '' %>>jazz</option>
+      <option value="soul" <%= music && music.genre === 'soul' ? 'selected' : '' %>>soul</option>
+      <option value="rap" <%= music && music.genre === 'rap' ? 'selected' : '' %>>rap</option>
+    </select>
+  </div>
+
+  <button type="submit"><%= music ? 'Update' : 'Add' %> Song</button>
+  <a href="/musics">
+    <button type="button">Cancel</button>
+  </a>
+  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+</form>
+
+<%- include("partials/footer.ejs") %>

@@ -1,0 +1,36 @@
+<%- include("partials/head.ejs") %>
+<%- include("partials/header.ejs") %>
+
+<h2>Music List</h2>
+<a href="/musics/new">
+    <button type="button">Add music</button>
+</a>
+<table id="musics-table">
+    <tr id="musics-table-header">
+        <th>Singer</th>
+        <th>Song</th>
+        <th>Genre</th>
+        <th colspan="2"></th>
+    </tr>
+    <% if (musics && musics.length) { %>
+        <% musics.forEach((music) => { %>
+        <tr>
+            <td><%= music.singer %></td>
+            <td><%= music.song %></td>
+            <td><%= music.genre %></td>
+            <td>
+                <a href="/musics/edit/<%= music.id %>">
+                    <button type="button">edit</button>
+                </a>
+            </td>
+            <td>
+                <form action="/musics/delete/<%= music.id %>" method="POST">
+                    <button type="submit">delete</button>
+                    <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+                </form>
+            </td>
+        </tr>
+        <% }) %>
+    <% } %>
+</table>
+<%- include("partials/footer.ejs") %>

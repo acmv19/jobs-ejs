@@ -1,6 +1,7 @@
 const User = require("../models/User");
 console.log("Importing parseValidationErr module...");
 const parseVErr = require("../util/parseValidationErr");
+const csrf = require("host-csrf");
 
 const registerShow = (req, res) => {
   res.render("register");
@@ -37,6 +38,7 @@ const logoff = (req, res) => {
 
 const logonShow = (req, res) => {
   if (req.user) {
+    csrf.refresh(req, res);
     return res.redirect("/");
   }
   res.render("logon", {
