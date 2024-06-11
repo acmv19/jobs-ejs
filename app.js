@@ -89,6 +89,27 @@ const csrf_middleware = csrf(csrf_options); // <-- Inicializar middleware CSRF
 
 app.use(csrf_middleware); // Must come after cookie-parser and body-parser, but before routes
 
+//Function Testing for An API
+app.get("/multiply", (req, res) => {
+  const result = req.query.first * req.query.second;
+  if (result.isNaN) {
+    result = "NaN";
+  } else if (result == null) {
+    result = "null";
+  }
+  res.json({ result: result });
+});
+
+//Function Testing for Rendered HTML
+
+app.use((req, res, next) => {
+  if (req.path == "/multiply") {
+    res.set("Content-Type", "application/json");
+  } else {
+    res.set("Content-Type", "text/html");
+  }
+  next();
+});
 //routes
 
 app.get("/", (req, res) => {
@@ -140,9 +161,29 @@ app.use((err, req, res, next) => {
 });
 
 const port = process.env.PORT || 3000;
-
-const start = async () => {
+const start = () => {
   try {
+    require("./db/connect")(url);
+    return app.listen(port, () =>
+      console.log(`Server is listening on port ${port}...`)
+    );
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const server = start();
+
+module.exports = { app, server };
+
+/*const start = async () => {
+  try {
+    ////Setting Up To Test
+    let mongoURL = process.env.MONGO_URI;
+    if (process.env.NODE_ENV == "test") {
+      mongoURL = process.env.MONGO_URI_TEST;
+    }
+    await require("./db/connect")(mongoURL);
     await require("./db/connect")(process.env.MONGO_URI);
     app.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)
@@ -152,4 +193,4 @@ const start = async () => {
   }
 };
 
-start();
+start();*/
