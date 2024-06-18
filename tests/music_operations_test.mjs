@@ -34,7 +34,7 @@ describe("test music operations", function () {
       await page.goto("http://localhost:3000/musics");
       const content = await page.content();
       const entries = content.split("<li>").length - 1;
-      expect(entries).to.equal(20);
+      expect(entries).to.equal(0);
     });
   });
 

@@ -10,7 +10,7 @@ const factoryAdapter = new FactoryBot.MongooseAdapter();
 factory.setAdapter(factoryAdapter);
 factory.define("music", Music, {
   singer: () => faker.singer.name(),
-  song: () => faker.person.jobTitle(),
+  song: () => faker.person.MusicTitle(),
   genre: () =>
     [
       "pop",
@@ -24,6 +24,7 @@ factory.define("music", Music, {
       "pasodoble",
       "blues",
       "jazz",
+
       "soul",
       "rap",
     ][Math.floor(3 * Math.random())], // random one of these
